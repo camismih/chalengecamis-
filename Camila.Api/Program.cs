@@ -30,4 +30,6 @@ app.MapPost("/v1.0/clientes", ([FromBody]CriaCliente request) =>
 return Results.Ok(cliente);
 });
 
+app.MapGet("/v1.0/clientes", () => Results.Ok(clientes.Select(c => new ClienteSummary(c.Id, c.Nome, c.NumeroConta, c.Saldo))));
+
 app.Run();
