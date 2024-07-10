@@ -43,7 +43,7 @@ app.MapGet("/v1.0/clientes/{numeroConta:int}", (int  numeroConta) =>
     return Results.Ok(new ClienteSummary(cliente.Id, cliente.Nome, cliente.NumeroConta, cliente.Saldo));
 });
 
-app.MapPost("/v1.0/transferencia", ([FromBody] PedidoTransferencia request) =>
+app.MapPost("/v1.0/transferencias", ([FromBody] PedidoTransferencia request) =>
 {
     if (request.Valor > 1000M)
     {
@@ -63,7 +63,6 @@ app.MapPost("/v1.0/transferencia", ([FromBody] PedidoTransferencia request) =>
     {
         return Results.NotFound();
     }    
-
 
     if (contaOrigem.Saldo < request.Valor)
     {
@@ -90,3 +89,8 @@ app.MapGet("/v1.0/transferencia/{numeroConta:int}", ([FromRouteAttribute] int nu
 });
 
 app.Run();
+
+public partial class Program
+{
+
+}
