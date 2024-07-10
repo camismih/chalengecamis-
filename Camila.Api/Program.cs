@@ -10,6 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddSingleton<IClienteRepository, InMemoryClienteRepository>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -21,43 +23,41 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-List<Cliente> clientes = [];
 List<Transferencia> transferencias = [];
 
-app.MapPost("/v1.0/clientes", ([FromBody]CriaCliente request) => 
+app.MapPost("/v1.0/clientes", async ([FromBody]CriaCliente request, IClienteRepository repository) => 
 {
-    var cliente = new Cliente(request.Nome, request.NumeroConta, request.Saldo);
-    clientes.Add(cliente);
+    var cliente = await repository.CriarClienteAsync(request);
 return Results.Ok(cliente);
 });
 
-app.MapGet("/v1.0/clientes", () => Results.Ok(clientes.Select(c => new ClienteSummary(c.Id, c.Nome, c.NumeroConta, c.Saldo))));
+app.MapGet("/v1.0/clientes", async (IClienteRepository repository) => Results.Ok(await repository.SelecionarTodosClientes()));
 
-app.MapGet("/v1.0/clientes/{numeroConta:int}", (int  numeroConta) =>
+app.MapGet("/v1.0/clientes/{numeroConta:int}", async (int  numeroConta, IClienteRepository repository) =>
 {
-    var cliente = clientes.FirstOrDefault(c => c.NumeroConta == numeroConta);
-    if (cliente == null)
+    var cliente = await repository.SelecionarClientePorNumeroConta(numeroConta);
+    if (cliente is null)
     {
         return Results.NotFound();
     }
     return Results.Ok(new ClienteSummary(cliente.Id, cliente.Nome, cliente.NumeroConta, cliente.Saldo));
 });
 
-app.MapPost("/v1.0/transferencias", ([FromBody] PedidoTransferencia request) =>
+app.MapPost("/v1.0/transferencias", async ([FromBody] PedidoTransferencia request, IClienteRepository clienteRepository) =>
 {
     if (request.Valor > 1000M)
     {
         return Results.BadRequest();
     }
 
-    var contaOrigem = clientes.FirstOrDefault(c => c.NumeroConta == request.NumeroContaOrigem);
+    var contaOrigem = await clienteRepository.SelecionarClientePorNumeroConta(request.NumeroContaOrigem);
 
     if (contaOrigem is null)
     {
         return Results.NotFound();
 }
 
-    var contaDestino = clientes.FirstOrDefault(c => c.NumeroConta == request.NumeroContaDestino);
+    var contaDestino = await clienteRepository.SelecionarClientePorNumeroConta(request.NumeroContaDestino);
 
     if (contaDestino is null)
     {
