@@ -22,6 +22,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 List<Cliente> clientes = [];
+List<Transferencia> transferencias = [];
 
 app.MapPost("/v1.0/clientes", ([FromBody]CriaCliente request) => 
 {
@@ -40,6 +41,41 @@ app.MapGet("/v1.0/clientes/{numeroConta:int}", (int  numeroConta) =>
         return Results.NotFound();
     }
     return Results.Ok(new ClienteSummary(cliente.Id, cliente.Nome, cliente.NumeroConta, cliente.Saldo));
+});
+
+app.MapPost("/v1.0/transferencia", ([FromBody] PedidoTransferencia request) =>
+{
+    if (request.Valor > 1000M)
+    {
+        return Results.BadRequest();
+    }
+
+    var contaOrigem = clientes.FirstOrDefault(c => c.NumeroConta == request.NumeroContaOrigem);
+
+    if (contaOrigem is null)
+    {
+        return Results.NotFound();
+}
+
+    var contaDestino = clientes.FirstOrDefault(c => c.NumeroConta == request.NumeroContaDestino);
+
+    if (contaDestino is null)
+    {
+        return Results.NotFound();
+    }    
+
+
+    if (contaOrigem.Saldo < request.Valor)
+    {
+        transferencias.Add(new Transferencia(DateTime.UtcNow, contaOrigem, contaDestino, request.Valor, false));
+        return Results.BadRequest();
+    }
+    transferencias.Add(new Transferencia(DateTime.UtcNow, contaOrigem, contaDestino, request.Valor, true));
+
+    contaOrigem.Sacar(request.Valor);
+    contaDestino.Depositar(request.Valor);
+
+    return Results.Ok();
 });
 
 app.Run();

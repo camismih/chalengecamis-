@@ -14,4 +14,7 @@ public class Cliente
         NumeroConta = numeroConta;
         Saldo = saldo;
     }
+
+    public void Depositar(decimal valor) => Saldo += valor;
+    public void Sacar(decimal valor) => Saldo -= valor;
 }
