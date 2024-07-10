@@ -32,4 +32,14 @@ return Results.Ok(cliente);
 
 app.MapGet("/v1.0/clientes", () => Results.Ok(clientes.Select(c => new ClienteSummary(c.Id, c.Nome, c.NumeroConta, c.Saldo))));
 
+app.MapGet("/v1.0/clientes/{numeroConta:int}", (int  numeroConta) =>
+{
+    var cliente = clientes.FirstOrDefault(c => c.NumeroConta == numeroConta);
+    if (cliente == null)
+    {
+        return Results.NotFound();
+    }
+    return Results.Ok(new ClienteSummary(cliente.Id, cliente.Nome, cliente.NumeroConta, cliente.Saldo));
+});
+
 app.Run();
