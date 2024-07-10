@@ -78,4 +78,15 @@ app.MapPost("/v1.0/transferencia", ([FromBody] PedidoTransferencia request) =>
     return Results.Ok();
 });
 
+app.MapGet("/v1.0/transferencia/{numeroConta:int}", ([FromRouteAttribute] int numeroConta) =>
+{
+    if (!transferencias.Any(t => t.ContaOrigem.NumeroConta == numeroConta || (t.ContaDestino.NumeroConta == numeroConta && t.Sucesso)))
+    {
+        return Results.NotFound();
+    }
+
+    return Results.Ok(transferencias.Where(t => t.ContaOrigem.NumeroConta == numeroConta || (t.ContaDestino.NumeroConta == numeroConta && t.Sucesso))
+        .Select(t => new TransferenciaSummary(t.Data, t.ContaOrigem.NumeroConta, t.ContaDestino.NumeroConta, t.Valor, t.Sucesso)));
+});
+
 app.Run();
