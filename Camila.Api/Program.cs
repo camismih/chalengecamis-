@@ -1,3 +1,8 @@
+using Camila.Api.Data;
+using Camila.Api.Models;
+
+using Microsoft.AspNetCore.Mvc;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -16,5 +21,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+List<Cliente> clientes = [];
+
+app.MapPost("/v1.0/clientes", ([FromBody]CriaCliente request) => 
+{
+    var cliente = new Cliente(request.Nome, request.NumeroConta, request.Saldo);
+    clientes.Add(cliente);
+return Results.Ok(cliente);
+});
 
 app.Run();
