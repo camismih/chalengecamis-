@@ -11,6 +11,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<IClienteRepository, InMemoryClienteRepository>();
+builder.Services.AddSingleton<ITransferenciaRepository, InMemoryTransferenciaRepository>();
 
 var app = builder.Build();
 
@@ -22,8 +23,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-List<Transferencia> transferencias = [];
 
 app.MapPost("/v1.0/clientes", async ([FromBody]CriaCliente request, IClienteRepository repository) => 
 {
@@ -43,33 +42,32 @@ app.MapGet("/v1.0/clientes/{numeroConta:int}", async (int  numeroConta, ICliente
     return Results.Ok(new ClienteSummary(cliente.Id, cliente.Nome, cliente.NumeroConta, cliente.Saldo));
 });
 
-app.MapPost("/v1.0/transferencias", async ([FromBody] PedidoTransferencia request, IClienteRepository clienteRepository) =>
+app.MapPost("/v1.0/transferencias", async ([FromBody] PedidoTransferencia request, IClienteRepository clienteRepository, ITransferenciaRepository transferenciaRepository) =>
 {
     if (request.Valor > 1000M)
     {
         return Results.BadRequest();
     }
 
+    if (! await clienteRepository.VerificaContaExisteAsync(request.NumeroContaOrigem))
+    {
+        return Results.NotFound();
+    }
+
+    if (!await clienteRepository.VerificaContaExisteAsync(request.NumeroContaDestino))
+    {
+        return Results.NotFound();
+    }
+
     var contaOrigem = await clienteRepository.SelecionarClientePorNumeroConta(request.NumeroContaOrigem);
-
-    if (contaOrigem is null)
-    {
-        return Results.NotFound();
-}
-
     var contaDestino = await clienteRepository.SelecionarClientePorNumeroConta(request.NumeroContaDestino);
-
-    if (contaDestino is null)
-    {
-        return Results.NotFound();
-    }    
-
+    
     if (contaOrigem.Saldo < request.Valor)
     {
-        transferencias.Add(new Transferencia(DateTime.UtcNow, contaOrigem, contaDestino, request.Valor, false));
+        await transferenciaRepository.RealizarTransferenciaAsync(contaOrigem, contaDestino, request.Valor, false);
         return Results.BadRequest();
     }
-    transferencias.Add(new Transferencia(DateTime.UtcNow, contaOrigem, contaDestino, request.Valor, true));
+    await transferenciaRepository.RealizarTransferenciaAsync(contaOrigem, contaDestino, request.Valor, true);
 
     contaOrigem.Sacar(request.Valor);
     contaDestino.Depositar(request.Valor);
@@ -77,15 +75,15 @@ app.MapPost("/v1.0/transferencias", async ([FromBody] PedidoTransferencia reques
     return Results.Ok();
 });
 
-app.MapGet("/v1.0/transferencia/{numeroConta:int}", ([FromRouteAttribute] int numeroConta) =>
+app.MapGet("/v1.0/transferencia/{numeroConta:int}", async ([FromRouteAttribute] int numeroConta, ITransferenciaRepository repository) =>
 {
-    if (!transferencias.Any(t => t.ContaOrigem.NumeroConta == numeroConta || (t.ContaDestino.NumeroConta == numeroConta && t.Sucesso)))
+    var transferencias = await repository.SelecionarTransferenciaPorNumeroContaAsync(numeroConta);
+    if (!transferencias.Any())
     {
         return Results.NotFound();
     }
 
-    return Results.Ok(transferencias.Where(t => t.ContaOrigem.NumeroConta == numeroConta || (t.ContaDestino.NumeroConta == numeroConta && t.Sucesso))
-        .Select(t => new TransferenciaSummary(t.Data, t.ContaOrigem.NumeroConta, t.ContaDestino.NumeroConta, t.Valor, t.Sucesso)));
+    return Results.Ok(transferencias);
 });
 
 app.Run();

@@ -28,4 +28,7 @@ public class InMemoryClienteRepository : IClienteRepository
     }
 
     public Task<IEnumerable<ClienteSummary>> SelecionarTodosClientes() => Task.FromResult(_clientes.Select(c => new ClienteSummary(c.Id, c.Nome, c.NumeroConta, c.Saldo)));
+
+
+    public Task<bool> VerificaContaExisteAsync(int numeroConta) => Task.FromResult(_clientes.Any(c => c.NumeroConta == numeroConta));
 }
