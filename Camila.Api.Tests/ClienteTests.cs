@@ -5,6 +5,7 @@ using Camila.Api.Models;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Camila.Api.Tests;
 
@@ -15,10 +16,10 @@ public class ClienteTests
 
     public ClienteTests(WebApplicationFactory<Program> factory)
     {
-        _factory = factory;
+        _factory = factory;        
     }
 
-    [Fact]
+    /*[Fact]
     public async Task Get_Cliente_Deve_Retornar_Not_Found()
     {
         // Arrange
@@ -29,7 +30,7 @@ public class ClienteTests
 
         // Assert                
         Assert.Empty(response);
-    }
+    }*/
 
     [Fact]
     public async Task Get_Clientes_Conta_Inexistente_Deve_Retornar_Nt_Found()

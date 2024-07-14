@@ -9,4 +9,5 @@ public interface IClienteRepository
     Task<bool> VerificaContaExisteAsync(int numeroConta);
 
     Task<ClienteSummary> CriarClienteAsync(CriaCliente request);
+    Task AtualizarContaAsync(Cliente conta);
 }

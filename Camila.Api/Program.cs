@@ -2,16 +2,26 @@ using Camila.Api.Data;
 using Camila.Api.Models;
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddDbContext<CamilaContext>(options =>
+{
+    options.UseInMemoryDatabase("Camila");
+    options.LogTo(Console.WriteLine);
+    options.EnableSensitiveDataLogging();
+});
+
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton<IClienteRepository, InMemoryClienteRepository>();
-builder.Services.AddSingleton<ITransferenciaRepository, InMemoryTransferenciaRepository>();
+builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
+builder.Services.AddScoped<ITransferenciaRepository, TransferenciaRepository>();
+builder.Services.AddScoped<TransferenciaService>();
 
 var app = builder.Build();
 
@@ -42,35 +52,14 @@ app.MapGet("/v1.0/clientes/{numeroConta:int}", async (int  numeroConta, ICliente
     return Results.Ok(new ClienteSummary(cliente.Id, cliente.Nome, cliente.NumeroConta, cliente.Saldo));
 });
 
-app.MapPost("/v1.0/transferencias", async ([FromBody] PedidoTransferencia request, IClienteRepository clienteRepository, ITransferenciaRepository transferenciaRepository) =>
+app.MapPost("/v1.0/transferencias", async ([FromBody] PedidoTransferencia request, TransferenciaService service) =>
 {
-    if (request.Valor > 1000M)
-    {
-        return Results.BadRequest();
-    }
+    var resultado = await service.RealizarTransferenciaAsync(request);
 
-    if (! await clienteRepository.VerificaContaExisteAsync(request.NumeroContaOrigem))
+    if (!resultado.ComSucesso)
     {
-        return Results.NotFound();
+        return Results.BadRequest(resultado.Erro);
     }
-
-    if (!await clienteRepository.VerificaContaExisteAsync(request.NumeroContaDestino))
-    {
-        return Results.NotFound();
-    }
-
-    var contaOrigem = await clienteRepository.SelecionarClientePorNumeroConta(request.NumeroContaOrigem);
-    var contaDestino = await clienteRepository.SelecionarClientePorNumeroConta(request.NumeroContaDestino);
-    
-    if (contaOrigem.Saldo < request.Valor)
-    {
-        await transferenciaRepository.RealizarTransferenciaAsync(contaOrigem, contaDestino, request.Valor, false);
-        return Results.BadRequest();
-    }
-    await transferenciaRepository.RealizarTransferenciaAsync(contaOrigem, contaDestino, request.Valor, true);
-
-    contaOrigem.Sacar(request.Valor);
-    contaDestino.Depositar(request.Valor);
 
     return Results.Ok();
 });

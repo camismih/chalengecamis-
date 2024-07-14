@@ -6,10 +6,20 @@ namespace Camila.Api.Data;
 public class InMemoryClienteRepository : IClienteRepository
 {
     private readonly List<Cliente> _clientes = [];
-    
+
+    public Task AtualizarContaAsync(Cliente conta)
+    {
+        return Task.CompletedTask;
+    }
+
     public Task<ClienteSummary> CriarClienteAsync(CriaCliente request)
     {
-        var cliente = new Cliente(request.Nome, request.NumeroConta, request.Saldo);
+        var cliente = new Cliente()
+        {
+            Nome = request.Nome,
+            NumeroConta = request.NumeroConta,
+            Saldo = request.Saldo
+        };
         _clientes.Add(cliente);
 
         return Task.FromResult(new ClienteSummary(cliente.Id, cliente.Nome, cliente.NumeroConta, cliente.Saldo));
