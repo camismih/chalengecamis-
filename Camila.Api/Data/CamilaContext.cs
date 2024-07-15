@@ -17,8 +17,7 @@ public class CamilaContext : DbContext
         {
             c.HasKey(c => c.Id);
 
-            c.HasIndex(c => c.Nome)
-            .IsUnique();
+            c.HasAlternateKey(c => c.NumeroConta);            
         });
 
         modelBuilder.Entity<Transferencia>(t =>

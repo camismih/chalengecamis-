@@ -81,7 +81,7 @@ public class ClienteTests :  IClassFixture<WebApplicationFactory<Program>>
     }
 }
 
-/*public class EmptyListTest : IClassFixture<WebApplicationFactory<Program>>
+public class EmptyListTest : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly WebApplicationFactory<Program> _factory;
 
@@ -111,4 +111,4 @@ public class ClienteTests :  IClassFixture<WebApplicationFactory<Program>>
         // Assert                
         Assert.Empty(response);
     }
-}*/
+}
