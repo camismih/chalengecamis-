@@ -13,8 +13,7 @@ public record class Resultado
 
 public record class Resultado<T> : Resultado
 {
-    public T Valor { get; private init; }
+    public T Valor { get; private init; } = default!;
 
-    public static Resultado<T> Sucesso(T valor) => new Resultado<T>() { ComSucesso = true, Valor = valor };
-    public static Resultado<T> Falha(string erro) => new() { ComSucesso = false, Erro = erro };    
+    public static Resultado<T> Sucesso(T valor) => new() { ComSucesso = true, Valor = valor };
 }

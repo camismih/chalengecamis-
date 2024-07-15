@@ -3,8 +3,8 @@
 public class  Transferencia
 {
     public DateTime Data { get; init; }
-    public Cliente ContaOrigem { get; init; }
-    public Cliente ContaDestino { get; init; }
+    public Cliente ContaOrigem { get; init; } = default!;
+    public Cliente ContaDestino { get; init; } = default!;
     public decimal Valor { get; init; }
     public bool Sucesso { get; init; }
 

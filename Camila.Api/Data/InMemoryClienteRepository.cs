@@ -14,12 +14,8 @@ public class InMemoryClienteRepository : IClienteRepository
 
     public Task<ClienteSummary> CriarClienteAsync(CriaCliente request)
     {
-        var cliente = new Cliente()
-        {
-            Nome = request.Nome,
-            NumeroConta = request.NumeroConta,
-            Saldo = request.Saldo
-        };
+        var cliente = Cliente.Create(request.Nome, request.NumeroConta, request.Saldo);
+
         _clientes.Add(cliente);
 
         return Task.FromResult(new ClienteSummary(cliente.Id, cliente.Nome, cliente.NumeroConta, cliente.Saldo));
@@ -31,7 +27,7 @@ public class InMemoryClienteRepository : IClienteRepository
 
         if (cliente is null)
         {
-            return Task.FromResult<Cliente>(null);
+            return Task.FromResult<Cliente>(default!);
         }
 
         return Task.FromResult(cliente);

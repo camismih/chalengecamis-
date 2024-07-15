@@ -20,6 +20,7 @@ public class CamilaContext : DbContext
             c.HasIndex(c => c.Nome)
             .IsUnique();
         });
+
         modelBuilder.Entity<Transferencia>(t =>
         {
             t.Property<Guid>("Id");

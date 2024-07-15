@@ -20,12 +20,7 @@ public class ClienteRepository : IClienteRepository
 
     public async Task<ClienteSummary> CriarClienteAsync(CriaCliente request)
     {
-        var cliente = new Cliente()
-        {
-            Nome = request.Nome,
-            NumeroConta = request.NumeroConta,
-            Saldo = request.Saldo
-        };
+        var cliente = Cliente.Create(request.Nome, request.NumeroConta, request.Saldo);
 
         _context.Clientes.Add(cliente);
 

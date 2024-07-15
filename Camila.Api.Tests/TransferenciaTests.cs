@@ -45,8 +45,8 @@ public class TransferenciaTests
 
         var response = await client.PostAsJsonAsync("/v1.0/transferencias", pedido);
 
-        var currentOrigem = await client.GetFromJsonAsync<Cliente>($"/v1.0/clientes/{origem.NumeroConta}");
-        var currentDestino = await client.GetFromJsonAsync<Cliente>($"/v1.0/clientes/{destino.NumeroConta}");
+        var currentOrigem = await client.GetFromJsonAsync<ClienteSummary>($"/v1.0/clientes/{origem.NumeroConta}");
+        var currentDestino = await client.GetFromJsonAsync<ClienteSummary>($"/v1.0/clientes/{destino.NumeroConta}");
 
         // Assert
         response.EnsureSuccessStatusCode();
