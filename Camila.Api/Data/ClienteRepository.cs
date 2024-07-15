@@ -1,4 +1,5 @@
-﻿using Camila.Api.Models;
+﻿
+using Camila.Api.Models;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -13,9 +14,19 @@ public class ClienteRepository : IClienteRepository
         _context = context;
     }
 
-    public async Task AtualizarContaAsync(Cliente conta)
+    public async Task<Resultado> DepositarAsync(ClienteSummary conta, decimal valor)
     {
+        var currentConta = await _context.Clientes.FirstOrDefaultAsync(c => c.Id == conta.Id && c.Versao == conta.Versao);
+
+        if (currentConta is null)
+        {
+            return Resultado.Falha("Inconsistência de dados. Favor tentar novamente.");
+        }
+
+        currentConta.Depositar(valor);
         await _context.SaveChangesAsync();
+
+        return Resultado.Sucesso();
     }
 
     public async Task<ClienteSummary> CriarClienteAsync(CriaCliente request)
@@ -26,21 +37,46 @@ public class ClienteRepository : IClienteRepository
 
         await _context.SaveChangesAsync();
 
-        return new ClienteSummary(cliente.Id, cliente.Nome, cliente.NumeroConta, cliente.Saldo);
+        return new ClienteSummary(cliente.Id, cliente.Nome, cliente.NumeroConta, cliente.Saldo, cliente.Versao);
     }
 
-    public async Task<Cliente> SelecionarClientePorNumeroConta(int numeroConta)
+    public async Task<ClienteSummary> SelecionarClientePorNumeroConta(int numeroConta)
     {
-        return await _context.Clientes.FirstOrDefaultAsync(c => c.NumeroConta == numeroConta);
+        return await _context.Clientes
+            .AsNoTracking()
+            .Select(c => new ClienteSummary(c.Id, c.Nome, c.NumeroConta, c.Saldo, c.Versao))
+            .FirstOrDefaultAsync(c => c.NumeroConta == numeroConta);
     }
 
     public async Task<IEnumerable<ClienteSummary>> SelecionarTodosClientes()
     {
-        return await _context.Clientes.Select(c => new ClienteSummary(c.Id, c.Nome, c.NumeroConta, c.Saldo)).ToListAsync();
+        return await _context.Clientes.Select(c => new ClienteSummary(c.Id, c.Nome, c.NumeroConta, c.Saldo, c.Versao)).ToListAsync();
     }
 
     public async Task<bool> VerificaContaExisteAsync(int numeroConta)
     {
-        return await _context.Clientes.AnyAsync(c => c.NumeroConta == numeroConta);
+        return await _context.Clientes
+            .AsNoTracking()
+            .AnyAsync(c => c.NumeroConta == numeroConta);
+    }
+
+    public async Task<Resultado> SacarAsync(ClienteSummary conta, decimal valor)
+    {
+        var currentConta = await _context.Clientes.FirstOrDefaultAsync(c => c.Id == conta.Id && c.Versao == conta.Versao);
+
+        if (currentConta is null)
+        {
+            return Resultado.Falha("Inconsistência de dados. Favor tentar novamente.");
+        }
+
+        currentConta.Sacar(valor);
+        await _context.SaveChangesAsync();
+
+        return Resultado.Sucesso();
+    }
+
+    public async Task<Cliente> SelecionarClientePorId(Guid id)
+    {
+        return await _context.Clientes.FirstOrDefaultAsync(c => c.Id == id);
     }
 }

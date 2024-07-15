@@ -1,4 +1,6 @@
-﻿using Camila.Api.Models;
+﻿using System.Transactions;
+
+using Camila.Api.Models;
 
 namespace Camila.Api.Data;
 
@@ -34,17 +36,31 @@ public class TransferenciaService
         var contaDestino = await _clienteRepository.SelecionarClientePorNumeroConta(request.NumeroContaDestino);
 
         bool sucesso = contaOrigem.Saldo >= request.Valor;
-        
-    await _transferenciaRepository.RealizarTransferenciaAsync(contaOrigem, contaDestino, request.Valor, sucesso);
+
+        var currentOrigem = await _clienteRepository.SelecionarClientePorId(contaOrigem.Id);
+        var currentDestino = await _clienteRepository.SelecionarClientePorId(contaDestino.Id);
+           
 
         if (sucesso)
         {
-            contaOrigem.Sacar(request.Valor);
-            contaDestino.Depositar(request.Valor);
+            using (var tx = new TransactionScope())
+            {
+                var resultadoSaque = await _clienteRepository.SacarAsync(contaOrigem, request.Valor);
+                if (!resultadoSaque.ComSucesso)
+                {
+                    return resultadoSaque;
+                }
+                var resultadoDeposito = await _clienteRepository.DepositarAsync(contaDestino, request.Valor);
+                if (!resultadoDeposito.ComSucesso)
+                {
+                    return resultadoDeposito;
+                }
 
-            await _clienteRepository.AtualizarContaAsync(contaOrigem);
-            await _clienteRepository.AtualizarContaAsync(contaDestino);
+                tx.Complete();
+            }
         }
+
+        await _transferenciaRepository.RealizarTransferenciaAsync(currentOrigem, currentDestino, request.Valor, sucesso);
 
         return Resultado.Sucesso();
     }

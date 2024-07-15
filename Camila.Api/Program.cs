@@ -50,7 +50,7 @@ app.MapGet("/v1.0/clientes/{numeroConta:int}", async (int  numeroConta, ICliente
     {
         return Results.NotFound();
     }
-    return Results.Ok(new ClienteSummary(cliente.Id, cliente.Nome, cliente.NumeroConta, cliente.Saldo));
+    return Results.Ok(new ClienteSummary(cliente.Id, cliente.Nome, cliente.NumeroConta, cliente.Saldo, cliente.Versao));
 });
 
 app.MapPost("/v1.0/transferencias", async ([FromBody] PedidoTransferencia request, TransferenciaService service) =>

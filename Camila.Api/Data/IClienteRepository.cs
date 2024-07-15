@@ -5,9 +5,12 @@ namespace Camila.Api.Data;
 public interface IClienteRepository
 {
     Task<IEnumerable<ClienteSummary>> SelecionarTodosClientes();
-    Task<Cliente> SelecionarClientePorNumeroConta(int numeroConta);
+    Task<ClienteSummary> SelecionarClientePorNumeroConta(int numeroConta);
+    Task<Cliente> SelecionarClientePorId(Guid id);
     Task<bool> VerificaContaExisteAsync(int numeroConta);
 
     Task<ClienteSummary> CriarClienteAsync(CriaCliente request);
-    Task AtualizarContaAsync(Cliente conta);
+
+    Task<Resultado> DepositarAsync(ClienteSummary conta, decimal valor);
+    Task<Resultado> SacarAsync(ClienteSummary conta, decimal valor);
 }

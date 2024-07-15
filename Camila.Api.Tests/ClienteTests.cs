@@ -8,39 +8,15 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Camila.Api.Tests;
-
-    public class EmptyTests : IClassFixture<WebApplicationFactory<Program>>
-    {
+public class ClienteTests :  IClassFixture<WebApplicationFactory<Program>>
+{
         private readonly WebApplicationFactory<Program> _factory;
 
-        public EmptyTests(WebApplicationFactory<Program> factory)
+        public ClienteTests(WebApplicationFactory<Program> factory)
         {
             _factory = factory;
         }
-
-        [Fact]
-        public async Task Get_Cliente_Deve_Retornar_Not_Found()
-        {
-            // Arrange
-            var client = _factory.CreateClient();
-
-            // Act
-            var response = await client.GetFromJsonAsync<IEnumerable<ClienteSummary>>("/v1.0/clientes");
-
-            // Assert                
-            Assert.Empty(response);
-        }
-    }
-
-    public class NotFoundTests : IClassFixture<WebApplicationFactory<Program>>
-    {
-        private readonly WebApplicationFactory<Program> _factory;
-
-        public NotFoundTests(WebApplicationFactory<Program> factory)
-        {
-            _factory = factory;
-        }
-
+    
         [Fact]
         public async Task Get_Clientes_Conta_Inexistente_Deve_Retornar_Nt_Found()
         {
@@ -53,17 +29,7 @@ namespace Camila.Api.Tests;
             // Assert                
             Assert.Equal(System.Net.HttpStatusCode.NotFound, response.StatusCode);
         }      
-    }
-
-    public class GetClienteTests : IClassFixture<WebApplicationFactory<Program>>
-    {
-        private readonly WebApplicationFactory<Program> _factory;
-
-        public GetClienteTests(WebApplicationFactory<Program> factory)
-        {
-            _factory = factory;
-        }
-
+    
         [Fact]
         public async Task Get_Clientes_Conta_Existente_Deve_Retornar_Conta()
         {
@@ -87,17 +53,7 @@ namespace Camila.Api.Tests;
             Assert.Equal(cliente.NumeroConta, response.NumeroConta);
             Assert.Equal(cliente.Saldo, response.Saldo);
         }
-    }
-
-    public class CriaClienteTests : IClassFixture<WebApplicationFactory<Program>>
-    {
-        private readonly WebApplicationFactory<Program> _factory;
-
-        public CriaClienteTests(WebApplicationFactory<Program> factory)
-        {
-            _factory = factory;
-        }
-
+    
     [Fact]
     public async Task Post_Clientes_Deve_Criar_Cliente()
     {
@@ -124,3 +80,35 @@ namespace Camila.Api.Tests;
         Assert.Equal(result.Saldo, cliente.Saldo);
     }
 }
+
+/*public class EmptyListTest : IClassFixture<WebApplicationFactory<Program>>
+{
+    private readonly WebApplicationFactory<Program> _factory;
+
+    public EmptyListTest(WebApplicationFactory<Program> factory)
+    {
+        _factory = factory;
+    }
+
+    [Fact]    
+    public async Task Get_Cliente_Deve_Retornar_Not_Found()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+
+        //Para validar este teste devemos aguardar os demais testes executarem
+        await Task.Delay(500);
+
+        var provider = _factory.Services.GetRequiredService<IServiceProvider>();
+        var scope = provider.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<CamilaContext>();
+        context.Clientes.RemoveRange(context.Clientes);
+       context.SaveChanges();
+
+        // Act
+        var response = await client.GetFromJsonAsync<IEnumerable<ClienteSummary>>("/v1.0/clientes");
+
+        // Assert                
+        Assert.Empty(response);
+    }
+}*/

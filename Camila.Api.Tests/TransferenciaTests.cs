@@ -36,6 +36,7 @@ public class TransferenciaTests
             NumeroConta = 98765,
             Saldo = 0M
         };
+
         var pedido = new PedidoTransferencia(origem.NumeroConta, destino.NumeroConta, 200M);
         var client = _factory.CreateClient();
 

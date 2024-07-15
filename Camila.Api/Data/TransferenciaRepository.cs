@@ -22,6 +22,7 @@ _context.Transferencias.Add(new Transferencia(DateTime.UtcNow, contaOrigem, cont
     public async Task<IEnumerable<TransferenciaSummary>> SelecionarTransferenciaPorNumeroContaAsync(int numeroConta)
     {
         return await _context.Transferencias
+            .AsNoTracking()
             .Where(t => t.ContaOrigem.NumeroConta == numeroConta || (t.ContaDestino.NumeroConta == numeroConta && t.Sucesso))
             .Select(t => new TransferenciaSummary(t.Data, t.ContaOrigem.NumeroConta, t.ContaDestino.NumeroConta, t.Valor, t.Sucesso))
             .ToListAsync();
