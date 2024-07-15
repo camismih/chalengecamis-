@@ -1,8 +1,9 @@
 namespace Camila.Api.Models;
 
-public record class CriaCliente
-{    
-    required public string Nome {get; init;}
-    required public int NumeroConta {get; init;}
-    required public decimal Saldo {get; init;}
-}
+/// <summary>
+/// Define a requisição para a criação de uma nova conta
+/// </summary>
+/// <param name="Nome"></param>
+/// <param name="NumeroConta"></param>
+/// <param name="Saldo"></param>
+public record class CriaCliente(string Nome, int NumeroConta , decimal Saldo);

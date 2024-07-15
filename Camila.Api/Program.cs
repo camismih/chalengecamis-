@@ -37,8 +37,14 @@ app.UseHttpsRedirection();
 
 app.MapPost("/v1.0/clientes", async ([FromBody]CriaCliente request, IClienteRepository repository) => 
 {
-    var cliente = await repository.CriarClienteAsync(request);
-return Results.Ok(cliente);
+    var resultado = await repository.CriarClienteAsync(request);
+
+    if (!resultado.ComSucesso)
+    {
+        return Results.BadRequest(resultado.Erro);
+    }
+
+return Results.Ok(resultado.Valor);
 });
 
 app.MapGet("/v1.0/clientes", async (IClienteRepository repository) => Results.Ok(await repository.SelecionarTodosClientes()));

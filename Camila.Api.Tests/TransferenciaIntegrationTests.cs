@@ -9,12 +9,12 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace Camila.Api.Tests;
 
-public class TransferenciaTests
+public class TransferenciaIntegrationTests
     : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly WebApplicationFactory<Program> _factory;
 
-    public TransferenciaTests(WebApplicationFactory<Program> factory)
+    public TransferenciaIntegrationTests(WebApplicationFactory<Program> factory)
     {
         _factory = factory;
     }
@@ -23,19 +23,9 @@ public class TransferenciaTests
     public async Task Post_Transferencia_Deve_Realizar_Transferencia()
     {
         // Arrange
-        var origem = new CriaCliente()
-        {
-            Nome = "Camila Marinho",
-            NumeroConta = 67890,
-            Saldo = 1000M
-        };
+        var origem = new CriaCliente("Camila Marinho", 67890, 1000M);
 
-        var destino = new CriaCliente()
-        {
-            Nome = "Enzo Marinho",
-            NumeroConta = 98765,
-            Saldo = 0M
-        };
+        var destino = new CriaCliente("Enzo Marinho", 98765, 0M);
 
         var pedido = new PedidoTransferencia(origem.NumeroConta, destino.NumeroConta, 200M);
         var client = _factory.CreateClient();

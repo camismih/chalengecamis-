@@ -4,6 +4,9 @@ using Camila.Api.Models;
 
 namespace Camila.Api.Data;
 
+/// <summary>
+/// Serviço para realização de transferência entre contas
+/// </summary>
 public class TransferenciaService
 {
     private readonly IClienteRepository _clienteRepository;
@@ -20,6 +23,11 @@ public class TransferenciaService
         if (request.Valor > 1000M)
         {
             return Resultado.Falha("As transferências devem ser de no máximo R$ 1000,00.");
+        }
+
+        if (request.NumeroContaOrigem == request.NumeroContaDestino)
+        {
+            return Resultado.Falha("A conta de origem e a conta de destino devem ser diferentes.");
         }
 
         if (!await _clienteRepository.VerificaContaExisteAsync(request.NumeroContaOrigem))

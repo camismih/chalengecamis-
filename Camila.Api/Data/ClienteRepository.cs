@@ -29,15 +29,30 @@ public class ClienteRepository : IClienteRepository
         return Resultado.Sucesso();
     }
 
-    public async Task<ClienteSummary> CriarClienteAsync(CriaCliente request)
+    public async Task<Resultado<ClienteSummary>> CriarClienteAsync(CriaCliente request)
     {
+        if (string.IsNullOrWhiteSpace(request.Nome))
+        {
+            return Resultado<ClienteSummary>.Falha("Nome é obrigatório.");
+        }
+
+        if (request.NumeroConta <= 0)
+        {
+            return Resultado<ClienteSummary>.Falha("Número da Conta deve ser um número inteiro maior que zero.");
+        }
+                
+        if (await VerificaContaExisteAsync(request.NumeroConta))
+        {
+            return Resultado<ClienteSummary>.Falha ("Número de conta já existe.");
+        }
+        
         var cliente = Cliente.Create(request.Nome, request.NumeroConta, request.Saldo);
 
         _context.Clientes.Add(cliente);
 
         await _context.SaveChangesAsync();
 
-        return new ClienteSummary(cliente.Id, cliente.Nome, cliente.NumeroConta, cliente.Saldo, cliente.Versao);
+        return Resultado<ClienteSummary>.Sucesso(new ClienteSummary(cliente.Id, cliente.Nome, cliente.NumeroConta, cliente.Saldo, cliente.Versao));
     }
 
     public async Task<ClienteSummary> SelecionarClientePorNumeroConta(int numeroConta)

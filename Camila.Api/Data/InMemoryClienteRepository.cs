@@ -8,13 +8,19 @@ public class InMemoryClienteRepository : IClienteRepository
 {
     private readonly List<Cliente> _clientes = [];
     
-    public Task<ClienteSummary> CriarClienteAsync(CriaCliente request)
+    public async Task<Resultado<ClienteSummary>> CriarClienteAsync(CriaCliente request)
     {
+        if (await VerificaContaExisteAsync(request.NumeroConta))
+        {
+            return Resultado<ClienteSummary>.Falha("Número de conta já existe.");
+        }
+        
+        
         var cliente = Cliente.Create(request.Nome, request.NumeroConta, request.Saldo);
 
         _clientes.Add(cliente);
 
-        return Task.FromResult(new ClienteSummary(cliente.Id, cliente.Nome, cliente.NumeroConta, cliente.Saldo, cliente.Versao));
+        return Resultado<ClienteSummary>.Sucesso(new ClienteSummary(cliente.Id, cliente.Nome, cliente.NumeroConta, cliente.Saldo, cliente.Versao));
     }
 
     public Task<Resultado> DepositarAsync(ClienteSummary conta, decimal valor)

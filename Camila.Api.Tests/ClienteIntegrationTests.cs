@@ -8,11 +8,11 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Camila.Api.Tests;
-public class ClienteTests :  IClassFixture<WebApplicationFactory<Program>>
+public class ClienteIntegrationTests :  IClassFixture<WebApplicationFactory<Program>>
 {
         private readonly WebApplicationFactory<Program> _factory;
 
-        public ClienteTests(WebApplicationFactory<Program> factory)
+        public ClienteIntegrationTests(WebApplicationFactory<Program> factory)
         {
             _factory = factory;
         }
@@ -34,12 +34,7 @@ public class ClienteTests :  IClassFixture<WebApplicationFactory<Program>>
         public async Task Get_Clientes_Conta_Existente_Deve_Retornar_Conta()
         {
             // Arrange
-            var cliente = new CriaCliente()
-            {
-                Nome = "Camila Marinho",
-                NumeroConta = 54321,
-                Saldo = 1000M
-            };
+            var cliente = new CriaCliente("Camila Marinho", 54321, 1000M);
             var client = _factory.CreateClient();
 
             // Act
@@ -58,12 +53,7 @@ public class ClienteTests :  IClassFixture<WebApplicationFactory<Program>>
     public async Task Post_Clientes_Deve_Criar_Cliente()
     {
         // Arrange
-        var cliente = new CriaCliente()
-        {
-            Nome = "Camila Marinho",
-            NumeroConta = 135246,
-            Saldo = 1000M
-        };
+        var cliente = new CriaCliente("Camila Marinho", 135246, 1000M);
 
         var client = _factory.CreateClient();
 
@@ -79,18 +69,8 @@ public class ClienteTests :  IClassFixture<WebApplicationFactory<Program>>
         Assert.Equal(result.NumeroConta, cliente.NumeroConta);
         Assert.Equal(result.Saldo, cliente.Saldo);
     }
-}
 
-public class EmptyListTest : IClassFixture<WebApplicationFactory<Program>>
-{
-    private readonly WebApplicationFactory<Program> _factory;
-
-    public EmptyListTest(WebApplicationFactory<Program> factory)
-    {
-        _factory = factory;
-    }
-
-    [Fact]    
+    [Fact]
     public async Task Get_Cliente_Deve_Retornar_Not_Found()
     {
         // Arrange
@@ -103,7 +83,7 @@ public class EmptyListTest : IClassFixture<WebApplicationFactory<Program>>
         var scope = provider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<CamilaContext>();
         context.Clientes.RemoveRange(context.Clientes);
-       context.SaveChanges();
+        context.SaveChanges();
 
         // Act
         var response = await client.GetFromJsonAsync<IEnumerable<ClienteSummary>>("/v1.0/clientes");

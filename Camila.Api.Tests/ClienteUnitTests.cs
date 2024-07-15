@@ -2,7 +2,7 @@
 
 namespace Camila.Api.Tests;
 
-public class UnitTests
+public class ClienteUnitTests
 {
     [Fact]
     public void Depositar_Deve_Atualizar_Saldo()
