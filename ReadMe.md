@@ -21,7 +21,7 @@ A solução foi dividida em dois projetos:
 
 ## Execução do projeto
 
-O único requisito para execuçao da API é o [.NET 8 SDK](https://dot.net/downloads).
+O único requisito para execução da API é o [.NET 8 SDK](https://dot.net/downloads).
 
 Para executar a APi, dentro da pasta `Camila.Api` digite:
 
@@ -29,7 +29,7 @@ Para executar a APi, dentro da pasta `Camila.Api` digite:
 dotnet run -lp https
 ```
 
-Já para exeutar os testes, dentro da pasta `Camila.Api.Tests` execute:
+Já para executar os testes, dentro da pasta `Camila.Api.Tests` execute:
 
 ```powershell
 dotnet test
@@ -39,4 +39,4 @@ dotnet test
 
 *Todos os endpoints foram definidos no arquivo `Program.cs` e de forma evolutiva sua implementação distribuida entre outros componentes
 * Para facilitar o entendimento foi utilizada uma estrutura muito parecida com os projetos **MVC** onde os `DTOs` foram implementados na pasta `Models` e a camada de persistência na pasta `Data`
-* Foi utilizada injeção de dependência para implementação de dois repositórios  para autmentar a testabilidade
+* Foi utilizada injeção de dependência para implementação de dois repositórios  para aumentar a testabilidade
